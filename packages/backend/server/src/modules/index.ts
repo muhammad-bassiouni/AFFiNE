@@ -3,6 +3,7 @@ import { DynamicModule, Type } from '@nestjs/common';
 import { GqlModule } from '../graphql.module';
 import { AuthModule } from './auth';
 import { DocModule } from './doc';
+import { QuotaModule } from './quota';
 import { SyncModule } from './sync';
 import { UsersModule } from './users';
 import { WorkspaceModule } from './workspaces';
@@ -21,6 +22,7 @@ switch (SERVER_FLAVOR) {
       WorkspaceModule,
       UsersModule,
       AuthModule,
+      QuotaModule,
       DocModule.forRoot()
     );
     break;
@@ -31,6 +33,7 @@ switch (SERVER_FLAVOR) {
       WorkspaceModule,
       UsersModule,
       AuthModule,
+      QuotaModule,
       SyncModule,
       DocModule.forRoot()
     );
