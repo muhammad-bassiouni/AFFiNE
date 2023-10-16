@@ -760,6 +760,9 @@ export class WorkspaceResolver {
       const { user } = await this.permissions.getWorkspaceOwner(workspaceId);
       if (user) {
         const quota = await this.users.getStorageQuotaById(user.id);
+        if (!quota) {
+          throw new ForbiddenException('cannot find user quota');
+        }
         const { size: currentSize } = await this.collectAllBlobSizes(user);
 
         return { size: quota - (size + currentSize) };
@@ -785,6 +788,9 @@ export class WorkspaceResolver {
     const { size } = await this.collectAllBlobSizes(owner);
 
     const checkExceeded = (recvSize: number) => {
+      if (!quota) {
+        throw new ForbiddenException('cannot find user quota');
+      }
       if (size + recvSize > quota) {
         this.logger.log(
           `storage size limit exceeded: ${size + recvSize} > ${quota}`

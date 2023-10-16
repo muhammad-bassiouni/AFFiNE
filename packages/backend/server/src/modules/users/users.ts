@@ -2,19 +2,23 @@ import { Injectable } from '@nestjs/common';
 
 import { Config } from '../../config';
 import { PrismaService } from '../../prisma';
-import { getStorageQuota } from './gates';
+import { StorageQuotaService } from '../quota';
 import { NewFeaturesKind } from './types';
-import { isStaff } from './utils';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly storageQuota: StorageQuotaService,
     private readonly config: Config
   ) {}
 
   async canEarlyAccess(email: string) {
-    if (this.config.featureFlags.earlyAccessPreview && !isStaff(email)) {
+    // TODO: Outdated, switch to feature gates
+    if (
+      this.config.featureFlags.earlyAccessPreview &&
+      !email.endsWith('@toeverything.info')
+    ) {
       return this.prisma.newFeaturesWaitingList
         .findUnique({
           where: { email, type: NewFeaturesKind.EarlyAccess },
@@ -25,21 +29,9 @@ export class UsersService {
     }
   }
 
-  async getStorageQuotaById(id: string) {
-    const features = await this.prisma.user
-      .findUnique({
-        where: { id },
-        select: {
-          features: {
-            select: {
-              feature: true,
-            },
-          },
-        },
-      })
-      .then(user => user?.features.map(f => f.feature.feature) ?? []);
-
-    return getStorageQuota(features) || this.config.objectStorage.quota;
+  async getStorageQuotaById(userId: string) {
+    const quota = await this.storageQuota.getStorageQuotaByUser(userId);
+    return quota?.storageQuota;
   }
 
   async findUserByEmail(email: string) {

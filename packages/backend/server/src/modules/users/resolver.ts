@@ -25,7 +25,6 @@ import { Auth, CurrentUser, Public } from '../auth/guard';
 import { StorageService } from '../storage/storage.service';
 import { NewFeaturesKind } from './types';
 import { UsersService } from './users';
-import { isStaff } from './utils';
 
 registerEnumType(NewFeaturesKind, {
   name: 'NewFeaturesKind',
@@ -223,7 +222,7 @@ export class UserResolver {
     type: NewFeaturesKind,
     @Args('email') email: string
   ): Promise<AddToNewFeaturesWaitingList> {
-    if (!isStaff(user.email)) {
+    if (!user.email.endsWith('@toeverything.info')) {
       throw new ForbiddenException('You are not allowed to do this');
     }
     await this.prisma.newFeaturesWaitingList.create({
