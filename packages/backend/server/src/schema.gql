@@ -38,17 +38,6 @@ type RemoveAvatar {
   success: Boolean!
 }
 
-type AddToNewFeaturesWaitingList {
-  email: String!
-
-  """New features kind"""
-  type: NewFeaturesKind!
-}
-
-enum NewFeaturesKind {
-  EarlyAccess
-}
-
 type TokenType {
   token: String!
   refresh: String!
@@ -172,6 +161,7 @@ type Query {
 
   """Get user by email"""
   user(email: String!): UserType
+  listEarlyAccess: [UserType!]!
 }
 
 type Mutation {
@@ -206,7 +196,8 @@ type Mutation {
   """Remove user avatar"""
   removeAvatar: RemoveAvatar!
   deleteAccount: DeleteAccount!
-  addToNewFeaturesWaitingList(type: NewFeaturesKind!, email: String!): AddToNewFeaturesWaitingList!
+  addToEarlyAccess(email: String!): String!
+  removeEarlyAccess(email: String!): Int!
 }
 
 """The `Upload` scalar type represents a file upload."""
