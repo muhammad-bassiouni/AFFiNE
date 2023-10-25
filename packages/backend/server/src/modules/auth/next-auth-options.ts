@@ -239,6 +239,7 @@ export const NextAuthOptionsProvider: FactoryProvider<NextAuthOptions> = {
                 feature: {
                   feature: 'early_access',
                 },
+                activated: true,
               },
             })
             .then(count => count > 0);
