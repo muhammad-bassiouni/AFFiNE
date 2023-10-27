@@ -196,7 +196,7 @@ type Mutation {
   """Remove user avatar"""
   removeAvatar: RemoveAvatar!
   deleteAccount: DeleteAccount!
-  addToEarlyAccess(email: String!): String!
+  addToEarlyAccess(email: String!): Int!
   removeEarlyAccess(email: String!): Int!
 }
 
