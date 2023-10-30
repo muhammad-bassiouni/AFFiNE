@@ -8,6 +8,7 @@ import { UsersService } from './users';
 @Module({
   imports: [StorageModule, QuotaModule],
   providers: [UserResolver, UsersService],
+  exports: [UsersService],
 })
 export class UsersModule {}
 

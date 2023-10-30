@@ -88,6 +88,8 @@ export const getDefaultAFFiNEConfig: () => AFFiNEConfig = () => {
         'boolean',
       ],
       ENABLE_LOCAL_EMAIL: ['auth.localEmail', 'boolean'],
+      STRIPE_API_KEY: 'payment.stripe.keys.APIKey',
+      STRIPE_WEBHOOK_KEY: 'payment.stripe.keys.webhookKey',
     } satisfies AFFiNEConfig['ENV_MAP'],
     affineEnv: 'dev',
     get affine() {
@@ -202,6 +204,15 @@ export const getDefaultAFFiNEConfig: () => AFFiNEConfig = () => {
       manager: {
         updatePollInterval: 3000,
         experimentalMergeWithJwstCodec: false,
+      },
+    },
+    payment: {
+      stripe: {
+        keys: {
+          APIKey: '',
+          webhookKey: '',
+        },
+        apiVersion: '2023-10-16',
       },
     },
   } satisfies AFFiNEConfig;

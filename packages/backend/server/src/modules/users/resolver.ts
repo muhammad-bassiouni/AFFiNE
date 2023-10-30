@@ -21,7 +21,7 @@ import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
 import { PrismaService } from '../../prisma/service';
 import { CloudThrottlerGuard, Throttle } from '../../throttler';
 import type { FileUpload } from '../../types';
-import { Auth, CurrentUser, Public } from '../auth/guard';
+import { Auth, CurrentUser, Public, Publicable } from '../auth/guard';
 import { AuthService } from '../auth/service';
 import { FeatureManagementService } from '../quota';
 import { StorageService } from '../storage/storage.service';
@@ -87,11 +87,17 @@ export class UserResolver {
       ttl: 60,
     },
   })
+  @Publicable()
   @Query(() => UserType, {
     name: 'currentUser',
     description: 'Get current user',
+    nullable: true,
   })
-  async currentUser(@CurrentUser() user: UserType) {
+  async currentUser(@CurrentUser() user?: UserType) {
+    if (!user) {
+      return null;
+    }
+
     const storedUser = await this.users.findUserById(user.id);
     if (!storedUser) {
       throw new BadRequestException(`User ${user.id} not found in db`);
