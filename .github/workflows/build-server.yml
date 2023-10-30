@@ -120,7 +120,9 @@ jobs:
           path: ./packages/backend/server
 
       - name: Run server tests
-        run: yarn workspace @affine/server test:coverage
+        run: |
+          yarn workspace @affine/server data-migration run
+          yarn workspace @affine/server test:coverage
         env:
           CARGO_TARGET_DIR: '${{ github.workspace }}/target'
           DATABASE_URL: postgresql://affine:affine@localhost:5432/affine
@@ -179,8 +181,10 @@ jobs:
         env:
           DATABASE_URL: postgresql://affine:affine@localhost:5432/affine
 
-      - name: Run init-db script
-        run: yarn workspace @affine/server exec ts-node ./scripts/init-db.ts
+      - name: Init database
+        run: |
+          yarn workspace @affine/server data-migration run
+          yarn workspace @affine/server exec ts-node ./scripts/init-db.ts
         env:
           DATABASE_URL: postgresql://affine:affine@localhost:5432/affine
 
