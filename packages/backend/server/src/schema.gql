@@ -164,9 +164,6 @@ type WorkspaceType {
   """Members of workspace"""
   members(skip: Int, take: Int): [InviteUserType!]!
 
-  """Blobs size of workspace"""
-  blobsSize: Int!
-
   """Permission of current signed in user in workspace"""
   permission: Permission!
 
@@ -178,6 +175,9 @@ type WorkspaceType {
 
   """Owner of workspace"""
   owner: UserType!
+
+  """Blobs size of workspace"""
+  blobsSize: Int!
 }
 
 type InvitationWorkspaceType {
@@ -267,7 +267,6 @@ type Mutation {
   """Remove user avatar"""
   removeAvatar: RemoveAvatar!
   deleteAccount: DeleteAccount!
-
   addToEarlyAccess(email: String!): Int!
   removeEarlyAccess(email: String!): Int!
 
