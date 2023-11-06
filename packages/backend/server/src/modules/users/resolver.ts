@@ -12,6 +12,7 @@ import {
   Mutation,
   ObjectType,
   Query,
+  ResolveField,
   Resolver,
 } from '@nestjs/graphql';
 import type { User } from '@prisma/client';
@@ -144,6 +145,17 @@ export class UserResolver {
       userResponse.hasPassword = true;
     }
     return user;
+  }
+
+  @Throttle({ default: { limit: 10, ttl: 60 } })
+  @ResolveField(() => Int, {
+    name: 'invoiceCount',
+    description: 'Get user invoice count',
+  })
+  async invoiceCount(@CurrentUser() user: UserType) {
+    return this.prisma.userInvoice.count({
+      where: { userId: user.id },
+    });
   }
 
   @Throttle({

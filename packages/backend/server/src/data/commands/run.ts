@@ -18,7 +18,9 @@ async function collectMigrations(): Promise<Migration[]> {
   const folder = join(fileURLToPath(import.meta.url), '../../migrations');
 
   const migrationFiles = readdirSync(folder)
-    .filter(desc => desc.endsWith('.ts') && desc !== 'index.ts')
+    .filter(desc =>
+      desc.endsWith(import.meta.url.endsWith('.ts') ? '.ts' : '.js')
+    )
     .map(desc => join(folder, desc));
 
   const migrations: Migration[] = await Promise.all(
@@ -82,6 +84,7 @@ export class RunCommand extends CommandRunner {
         done.push(migration);
       } catch (e) {
         this.logger.error('Failed to run data migration', e);
+        process.exit(1);
       }
     }
 
