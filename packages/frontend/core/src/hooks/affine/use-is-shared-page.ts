@@ -2,6 +2,7 @@ import { pushNotificationAtom } from '@affine/component/notification-center';
 import type { ShareMode } from '@affine/component/share-menu/use-share-url';
 import {
   getWorkspacePublicPagesQuery,
+  PublicPageMode,
   publishPageMutation,
   revokePublicPageMutation,
 } from '@affine/graphql';
@@ -9,11 +10,6 @@ import { useAFFiNEI18N } from '@affine/i18n/hooks';
 import { useMutation, useQuery } from '@affine/workspace/affine/gql';
 import { useSetAtom } from 'jotai';
 import { useCallback, useMemo } from 'react';
-
-export enum PublicPageMode {
-  Edgeless = 'Edgeless',
-  Page = 'Page',
-}
 
 export function useIsSharedPage(
   workspaceId: string,
