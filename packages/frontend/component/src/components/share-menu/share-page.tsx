@@ -3,7 +3,8 @@ import { useAFFiNEI18N } from '@affine/i18n/hooks';
 import { ArrowRightSmallIcon } from '@blocksuite/icons';
 import { Button } from '@toeverything/components/button';
 import { Menu, MenuItem, MenuTrigger } from '@toeverything/components/menu';
-import { useState } from 'react';
+import { ConfirmModal } from '@toeverything/components/modal';
+import { useMemo, useState } from 'react';
 import { useCallback } from 'react';
 
 import { RadioButton, RadioButtonGroup } from '../../ui/button';
@@ -13,7 +14,7 @@ import { toast } from '../../ui/toast';
 import { PublicLinkDisableModal } from './disable-public-link';
 import * as styles from './index.css';
 import type { ShareMenuProps } from './share-menu';
-import { useSharingUrl } from './use-share-url';
+import { type ShareMode, useSharingUrl } from './use-share-url';
 
 const CloudSvg = () => (
   <svg
@@ -69,27 +70,66 @@ export const AffineSharePage = (props: ShareMenuProps) => {
   const {
     workspace: { id: workspaceId },
     currentPage: { id: pageId },
+    currentPageMode,
   } = props;
-  const [isPublic, setIsPublic] = props.useIsSharedPage(workspaceId, pageId);
+  const { isSharedPage, toggleShare } = props.useIsSharedPage(
+    workspaceId,
+    pageId
+  );
+  const [currentShareMode, updateShareMode] = props.useShareMode(
+    workspaceId,
+    pageId
+  );
+
   const [showDisable, setShowDisable] = useState(false);
+  const [showChangeModeModal, setShowChangeModeModal] = useState(false);
+  const [mode, setMode] = useState<ShareMode>(currentPageMode);
+
+  const defaultMode = useMemo(() => {
+    if (isSharedPage) {
+      // if it's a shared page, use the share mode
+      return currentShareMode;
+    }
+    // default to current page mode
+    return currentPageMode;
+  }, [currentPageMode, currentShareMode, isSharedPage]);
+
   const { sharingUrl, onClickCopyLink } = useSharingUrl({
     workspaceId,
     pageId,
     urlType: 'share',
+    mode: mode,
   });
   const t = useAFFiNEI18N();
 
   const onClickCreateLink = useCallback(() => {
-    setIsPublic(true);
-  }, [setIsPublic]);
+    toggleShare(true, mode);
+  }, [mode, toggleShare]);
 
   const onDisablePublic = useCallback(() => {
-    setIsPublic(false);
+    toggleShare(false);
     toast('Successfully disabled', {
       portal: document.body,
     });
     setShowDisable(false);
-  }, [setIsPublic]);
+  }, [toggleShare]);
+
+  const onShareModeChange = useCallback(
+    (value: ShareMode) => {
+      if (isSharedPage) {
+        return setShowChangeModeModal(true);
+      }
+      setMode(value);
+    },
+    [isSharedPage]
+  );
+
+  const onConfirmChangeMode = useCallback(() => {
+    const value = mode === 'edgeless' ? 'page' : 'edgeless';
+    updateShareMode(value);
+    setMode(value);
+    setShowChangeModeModal(false);
+  }, [mode, updateShareMode]);
 
   return (
     <>
@@ -108,10 +148,12 @@ export const AffineSharePage = (props: ShareMenuProps) => {
             fontSize: 'var(--affine-font-xs)',
             lineHeight: '20px',
           }}
-          value={isPublic ? sharingUrl : `${runtimeConfig.serverUrlPrefix}/...`}
+          value={
+            isSharedPage ? sharingUrl : `${runtimeConfig.serverUrlPrefix}/...`
+          }
           readOnly
         />
-        {isPublic ? (
+        {isSharedPage ? (
           <Button
             onClick={onClickCopyLink}
             data-testid="share-menu-copy-link-button"
@@ -130,36 +172,35 @@ export const AffineSharePage = (props: ShareMenuProps) => {
           </Button>
         )}
       </div>
-      {runtimeConfig.enableEnhanceShareMode ? (
-        <div className={styles.rowContainerStyle}>
-          <div className={styles.subTitleStyle}>
-            {t['com.affine.share-menu.ShareMode']()}
-          </div>
-          <div>
-            <RadioButtonGroup
-              className={styles.radioButtonGroup}
-              defaultValue={'page'}
-              onValueChange={() => {}}
-            >
-              <RadioButton
-                className={styles.radioButton}
-                value={'page'}
-                spanStyle={styles.spanStyle}
-              >
-                {t['com.affine.pageMode.page']()}
-              </RadioButton>
-              <RadioButton
-                className={styles.radioButton}
-                value={'edgeless'}
-                spanStyle={styles.spanStyle}
-              >
-                {t['com.affine.pageMode.edgeless']()}
-              </RadioButton>
-            </RadioButtonGroup>
-          </div>
+      <div className={styles.rowContainerStyle}>
+        <div className={styles.subTitleStyle}>
+          {t['com.affine.share-menu.ShareMode']()}
         </div>
-      ) : null}
-      {isPublic ? (
+        <div>
+          <RadioButtonGroup
+            className={styles.radioButtonGroup}
+            defaultValue={defaultMode}
+            value={mode}
+            onValueChange={onShareModeChange}
+          >
+            <RadioButton
+              className={styles.radioButton}
+              value={'page'}
+              spanStyle={styles.spanStyle}
+            >
+              {t['com.affine.pageMode.page']()}
+            </RadioButton>
+            <RadioButton
+              className={styles.radioButton}
+              value={'edgeless'}
+              spanStyle={styles.spanStyle}
+            >
+              {t['com.affine.pageMode.edgeless']()}
+            </RadioButton>
+          </RadioButtonGroup>
+        </div>
+      </div>
+      {isSharedPage ? (
         <>
           {runtimeConfig.enableEnhanceShareMode && (
             <>
@@ -207,6 +248,19 @@ export const AffineSharePage = (props: ShareMenuProps) => {
             open={showDisable}
             onConfirm={onDisablePublic}
             onOpenChange={setShowDisable}
+          />
+          <ConfirmModal
+            open={showChangeModeModal}
+            onOpenChange={setShowChangeModeModal}
+            title={t['com.affine.share-menu.confirm-modify-mode.title']()}
+            description={t['com.affine.share-menu.confirm-modify-mode.title']()}
+            confirmButtonOptions={{
+              type: 'primary',
+              ['data-testid' as string]:
+                'confirm-change-share-page-mode-button',
+              children: 'Modify',
+            }}
+            onConfirm={onConfirmChangeMode}
           />
         </>
       ) : null}

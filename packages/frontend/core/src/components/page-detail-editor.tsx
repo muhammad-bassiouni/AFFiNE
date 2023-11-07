@@ -46,6 +46,9 @@ function useRouterHash() {
 
 export type OnLoadEditor = (page: Page, editor: EditorContainer) => () => void;
 
+function useRouterQuery() {
+  return new URLSearchParams(useLocation().search);
+}
 export interface PageDetailEditorProps {
   isPublic?: boolean;
   workspace: Workspace;
@@ -91,6 +94,15 @@ const EditorWrapper = memo(function EditorWrapper({
     return fontStyle.value;
   }, [appSettings.fontStyle]);
 
+  const query = useRouterQuery();
+  const shareMode = useMemo(() => {
+    const mode = query.get('mode');
+    if (mode === 'edgeless') {
+      return 'edgeless';
+    }
+    return 'page';
+  }, [query]);
+
   const [loading, setLoading] = useState(true);
   const blockId = useRouterHash();
   const blockElement = useMemo(() => {
@@ -116,13 +128,16 @@ const EditorWrapper = memo(function EditorWrapper({
 
   const setEditorMode = useCallback(
     (mode: 'page' | 'edgeless') => {
+      if (isPublic) {
+        return;
+      }
       if (mode === 'edgeless') {
         switchToEdgelessMode(pageId);
       } else {
         switchToPageMode(pageId);
       }
     },
-    [switchToEdgelessMode, switchToPageMode, pageId]
+    [isPublic, switchToEdgelessMode, pageId, switchToPageMode]
   );
 
   return (
@@ -137,7 +152,7 @@ const EditorWrapper = memo(function EditorWrapper({
             '--affine-font-family': value,
           } as CSSProperties
         }
-        mode={isPublic ? 'page' : currentMode}
+        mode={isPublic ? shareMode : currentMode}
         page={page}
         onModeChange={setEditorMode}
         onInit={useCallback(

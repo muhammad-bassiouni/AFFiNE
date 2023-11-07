@@ -320,6 +320,22 @@ query getWorkspacePublicById($id: String!) {
 }`,
 };
 
+export const getWorkspacePublicPagesQuery = {
+  id: 'getWorkspacePublicPagesQuery' as const,
+  operationName: 'getWorkspacePublicPages',
+  definitionName: 'workspace',
+  containsFile: false,
+  query: `
+query getWorkspacePublicPages($workspaceId: String!) {
+  workspace(id: $workspaceId) {
+    publicPages {
+      id
+      mode
+    }
+  }
+}`,
+};
+
 export const getWorkspaceSharedPagesQuery = {
   id: 'getWorkspaceSharedPagesQuery' as const,
   operationName: 'getWorkspaceSharedPages',
@@ -428,6 +444,20 @@ query prices {
 }`,
 };
 
+export const publishPageMutation = {
+  id: 'publishPageMutation' as const,
+  operationName: 'publishPage',
+  definitionName: 'publishPage',
+  containsFile: false,
+  query: `
+mutation publishPage($workspaceId: String!, $pageId: String!, $mode: PublicPageMode = Page) {
+  publishPage(workspaceId: $workspaceId, pageId: $pageId, mode: $mode) {
+    id
+    mode
+  }
+}`,
+};
+
 export const removeAvatarMutation = {
   id: 'removeAvatarMutation' as const,
   operationName: 'removeAvatar',
@@ -477,6 +507,21 @@ export const revokePageMutation = {
   query: `
 mutation revokePage($workspaceId: String!, $pageId: String!) {
   revokePage(workspaceId: $workspaceId, pageId: $pageId)
+}`,
+};
+
+export const revokePublicPageMutation = {
+  id: 'revokePublicPageMutation' as const,
+  operationName: 'revokePublicPage',
+  definitionName: 'revokePublicPage',
+  containsFile: false,
+  query: `
+mutation revokePublicPage($workspaceId: String!, $pageId: String!) {
+  revokePublicPage(workspaceId: $workspaceId, pageId: $pageId) {
+    id
+    mode
+    public
+  }
 }`,
 };
 
