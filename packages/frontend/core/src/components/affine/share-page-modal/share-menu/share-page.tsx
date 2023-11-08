@@ -115,9 +115,11 @@ export const AffineSharePage = (props: ShareMenuProps) => {
   const onShareModeChange = useCallback(
     (value: PageMode) => {
       setMode(value);
-      changeShare(value);
+      if (isSharedPage) {
+        changeShare(value);
+      }
     },
-    [changeShare]
+    [changeShare, isSharedPage]
   );
 
   return (
