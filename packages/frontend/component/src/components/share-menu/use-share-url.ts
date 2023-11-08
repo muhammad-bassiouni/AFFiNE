@@ -20,6 +20,10 @@ export const generateUrl = ({
   urlType,
   mode,
 }: UseSharingUrl) => {
+  // to generate a private url like https://affine.app/workspace/123/456
+  // to generate a public url like https://affine.app/share/123/456
+  // or https://affine.app/share/123/456?mode=edgeless
+
   const url = new URL(
     `${runtimeConfig.serverUrlPrefix}/${urlType}/${workspaceId}/${pageId}`
   );
