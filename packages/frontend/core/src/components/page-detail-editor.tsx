@@ -29,9 +29,8 @@ import {
 } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { useLocation } from 'react-router-dom';
-import { useSearchParams } from 'react-router-dom';
 
-import { pageSettingFamily } from '../atoms';
+import { type PageMode, pageSettingFamily } from '../atoms';
 import { fontStyleOptions } from '../atoms/settings';
 import { useAppSettingHelper } from '../hooks/affine/use-app-setting-helper';
 import { useBlockSuiteMetaHelper } from '../hooks/affine/use-block-suite-meta-helper';
@@ -49,6 +48,7 @@ export type OnLoadEditor = (page: Page, editor: EditorContainer) => () => void;
 
 export interface PageDetailEditorProps {
   isPublic?: boolean;
+  publishMode?: PageMode;
   workspace: Workspace;
   pageId: string;
   onInit: (
@@ -64,6 +64,7 @@ const EditorWrapper = memo(function EditorWrapper({
   onInit,
   onLoad,
   isPublic,
+  publishMode,
 }: PageDetailEditorProps) {
   const page = useBlockSuiteWorkspacePage(workspace, pageId);
   if (!page) {
@@ -78,7 +79,16 @@ const EditorWrapper = memo(function EditorWrapper({
 
   const pageSettingAtom = pageSettingFamily(pageId);
   const pageSetting = useAtomValue(pageSettingAtom);
-  const currentMode = pageSetting?.mode ?? 'page';
+
+  const mode = useMemo(() => {
+    const currentMode = pageSetting.mode;
+    const shareMode = publishMode || currentMode;
+
+    if (isPublic) {
+      return shareMode;
+    }
+    return currentMode;
+  }, [isPublic, publishMode, pageSetting.mode]);
 
   const setBlockHub = useSetAtom(rootBlockHubAtom);
   const { appSettings } = useAppSettingHelper();
@@ -91,12 +101,6 @@ const EditorWrapper = memo(function EditorWrapper({
     assertExists(fontStyle);
     return fontStyle.value;
   }, [appSettings.fontStyle]);
-
-  const [searchParams] = useSearchParams();
-  const shareMode = useMemo(() => {
-    const mode = searchParams.get('mode');
-    return mode === 'edgeless' ? 'edgeless' : 'page';
-  }, [searchParams]);
 
   const [loading, setLoading] = useState(true);
   const blockId = useRouterHash();
@@ -147,7 +151,7 @@ const EditorWrapper = memo(function EditorWrapper({
             '--affine-font-family': value,
           } as CSSProperties
         }
-        mode={isPublic ? shareMode : currentMode}
+        mode={mode}
         page={page}
         onModeChange={setEditorMode}
         onInit={useCallback(

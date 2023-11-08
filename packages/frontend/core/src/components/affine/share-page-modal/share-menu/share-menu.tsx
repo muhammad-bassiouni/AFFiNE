@@ -71,9 +71,12 @@ const CloudShareMenu = (props: ShareMenuProps) => {
   const t = useAFFiNEI18N();
   const {
     workspace: { id: workspaceId },
-    currentPage: { id: pageId },
+    currentPage,
   } = props;
-  const { isSharedPage } = useIsSharedPage(workspaceId, pageId);
+  const { isSharedPage } = useIsSharedPage(
+    workspaceId,
+    currentPage.spaceDoc.guid
+  );
 
   return (
     <Menu

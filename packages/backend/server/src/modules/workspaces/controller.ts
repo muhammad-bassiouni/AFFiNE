@@ -17,7 +17,7 @@ import { DocID } from '../../utils/doc';
 import { Auth, CurrentUser, Publicable } from '../auth';
 import { DocManager } from '../doc';
 import { UserType } from '../users';
-import { PermissionService } from './permission';
+import { PermissionService, PublicPageMode } from './permission';
 
 @Controller('/api/workspaces')
 export class WorkspacesController {
@@ -81,6 +81,16 @@ export class WorkspacesController {
     if (!update) {
       throw new NotFoundException('Doc not found');
     }
+
+    // fetch the publish page mode for publish page
+    const publishPage = await this.permission.publishPage(
+      docId.workspace,
+      docId.guid
+    );
+    const publishPageMode =
+      publishPage.mode === PublicPageMode.Edgeless ? 'edgeless' : 'page';
+
+    res.setHeader('publish-mode', publishPageMode);
 
     res.setHeader('content-type', 'application/octet-stream');
     res.send(update);

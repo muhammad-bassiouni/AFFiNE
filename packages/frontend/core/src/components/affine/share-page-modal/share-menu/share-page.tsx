@@ -71,13 +71,13 @@ export const LocalSharePage = (props: ShareMenuProps) => {
 export const AffineSharePage = (props: ShareMenuProps) => {
   const {
     workspace: { id: workspaceId },
-    currentPage: { id: pageId },
+    currentPage,
   } = props;
-
+  const pageId = currentPage.id;
   const [showDisable, setShowDisable] = useState(false);
   const [showChangeModeModal, setShowChangeModeModal] = useState(false);
   const { isSharedPage, changeShare, currentShareMode, disableShare } =
-    useIsSharedPage(workspaceId, pageId);
+    useIsSharedPage(workspaceId, currentPage.spaceDoc.guid);
   const currentPageMode = useAtomValue(currentModeAtom);
   const [mode, setMode] = useState<PageMode>(currentPageMode);
 
@@ -94,7 +94,6 @@ export const AffineSharePage = (props: ShareMenuProps) => {
     workspaceId,
     pageId,
     urlType: 'share',
-    mode: mode,
   });
   const t = useAFFiNEI18N();
 
