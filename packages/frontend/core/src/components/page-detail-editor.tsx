@@ -29,6 +29,7 @@ import {
 } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { useLocation } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 import { pageSettingFamily } from '../atoms';
 import { fontStyleOptions } from '../atoms/settings';
@@ -46,9 +47,6 @@ function useRouterHash() {
 
 export type OnLoadEditor = (page: Page, editor: EditorContainer) => () => void;
 
-function useRouterQuery() {
-  return new URLSearchParams(useLocation().search);
-}
 export interface PageDetailEditorProps {
   isPublic?: boolean;
   workspace: Workspace;
@@ -94,14 +92,11 @@ const EditorWrapper = memo(function EditorWrapper({
     return fontStyle.value;
   }, [appSettings.fontStyle]);
 
-  const query = useRouterQuery();
+  const [searchParams] = useSearchParams();
   const shareMode = useMemo(() => {
-    const mode = query.get('mode');
-    if (mode === 'edgeless') {
-      return 'edgeless';
-    }
-    return 'page';
-  }, [query]);
+    const mode = searchParams.get('mode');
+    return mode === 'edgeless' ? 'edgeless' : 'page';
+  }, [searchParams]);
 
   const [loading, setLoading] = useState(true);
   const blockId = useRouterHash();

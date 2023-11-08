@@ -16,7 +16,9 @@ export function useIsSharedPage(
   pageId: string
 ): {
   isSharedPage: boolean;
-  toggleShare: (enable: boolean, shareMode?: ShareMode) => void;
+  changeShare: (mode: ShareMode) => void;
+  disableShare: () => void;
+  currentShareMode: ShareMode;
 } {
   const t = useAFFiNEI18N();
   const pushNotification = useSetAtom(pushNotificationAtom);
@@ -34,105 +36,101 @@ export function useIsSharedPage(
     mutation: revokePublicPageMutation,
   });
 
-  const isSharedPage = useMemo(
-    () =>
-      data?.workspace.publicPages.some(publicPage => publicPage.id === pageId),
-    [data?.workspace.publicPages, pageId]
-  );
+  const [isSharedPage, currentShareMode] = useMemo(() => {
+    const publicPage = data?.workspace.publicPages.find(
+      publicPage => publicPage.id === pageId
+    );
+    const isPageShared = !!publicPage;
 
-  const toggleShare = useCallback(
-    (enable: boolean, mode?: ShareMode) => {
-      // todo: push notification
+    const currentShareMode: ShareMode =
+      publicPage?.mode === PublicPageMode.Edgeless ? 'edgeless' : 'page';
+
+    return [isPageShared, currentShareMode];
+  }, [data?.workspace.publicPages, pageId]);
+
+  const changeShare = useCallback(
+    (mode: ShareMode) => {
       const publishMode =
         mode === 'edgeless' ? PublicPageMode.Edgeless : PublicPageMode.Page;
-      if (enable && mode) {
-        enableSharePage({
-          workspaceId,
-          pageId,
-          mode: publishMode,
-        })
-          .then(() => {
-            pushNotification({
-              title:
-                t[
-                  'com.affine.share-menu.create-public-link.notification.success.title'
-                ](),
-              message:
-                t[
-                  'com.affine.share-menu.create-public-link.notification.success.message'
-                ](),
-              type: 'success',
-              theme: 'default',
-            });
-            return mutate();
-          })
-          .catch(e => {
-            pushNotification({
-              title:
-                t[
-                  'com.affine.share-menu.create-public-link.notification.fail.title'
-                ](),
-              message:
-                t[
-                  'com.affine.share-menu.create-public-link.notification.fail.message'
-                ](),
-              type: 'error',
-            });
-            console.error(e);
+
+      enableSharePage({ workspaceId, pageId, mode: publishMode })
+        .then(() => {
+          pushNotification({
+            title:
+              t[
+                'com.affine.share-menu.create-public-link.notification.success.title'
+              ](),
+            message:
+              t[
+                'com.affine.share-menu.create-public-link.notification.success.message'
+              ](),
+            type: 'success',
+            theme: 'default',
           });
-      } else {
-        disableSharePage({
-          workspaceId,
-          pageId,
+
+          return mutate();
         })
-          .then(() => {
-            pushNotification({
-              title:
-                t[
-                  'com.affine.share-menu.disable-publish-link.notification.success.title'
-                ](),
-              message:
-                t[
-                  'com.affine.share-menu.disable-publish-link.notification.success.message'
-                ](),
-              type: 'success',
-              theme: 'default',
-            });
-            return mutate();
-          })
-          .catch(e => {
-            pushNotification({
-              title:
-                t[
-                  'com.affine.share-menu.disable-publish-link.notification.fail.title'
-                ](),
-              message:
-                t[
-                  'com.affine.share-menu.disable-publish-link.notification.fail.message'
-                ](),
-              type: 'error',
-            });
-            console.error(e);
+        .catch(e => {
+          pushNotification({
+            title:
+              t[
+                'com.affine.share-menu.create-public-link.notification.fail.title'
+              ](),
+            message:
+              t[
+                'com.affine.share-menu.create-public-link.notification.fail.message'
+              ](),
+            type: 'error',
           });
-      }
-      mutate().catch(console.error);
+
+          console.error(e);
+        });
     },
-    [
-      disableSharePage,
-      enableSharePage,
-      mutate,
-      pageId,
-      pushNotification,
-      t,
-      workspaceId,
-    ]
+    [enableSharePage, mutate, pageId, pushNotification, t, workspaceId]
   );
+
+  const disableShare = useCallback(() => {
+    disableSharePage({ workspaceId, pageId })
+      .then(() => {
+        pushNotification({
+          title:
+            t[
+              'com.affine.share-menu.disable-publish-link.notification.success.title'
+            ](),
+          message:
+            t[
+              'com.affine.share-menu.disable-publish-link.notification.success.message'
+            ](),
+          type: 'success',
+          theme: 'default',
+        });
+
+        return mutate();
+      })
+      .catch(e => {
+        pushNotification({
+          title:
+            t[
+              'com.affine.share-menu.disable-publish-link.notification.fail.title'
+            ](),
+          message:
+            t[
+              'com.affine.share-menu.disable-publish-link.notification.fail.message'
+            ](),
+          type: 'error',
+        });
+
+        console.error(e);
+      });
+  }, [disableSharePage, mutate, pageId, pushNotification, t, workspaceId]);
 
   return useMemo(
     () => ({
       isSharedPage,
-      toggleShare,
+      currentShareMode,
+      changeShare,
+      disableShare,
     }),
-    [isSharedPage, toggleShare]
+    [changeShare, currentShareMode, disableShare, isSharedPage]
   );
 }

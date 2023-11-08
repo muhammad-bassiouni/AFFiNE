@@ -74,18 +74,10 @@ export const Basic: StoryFn = () => {
   return (
     <ShareMenu
       currentPage={blockSuiteWorkspace.getPage('page0') as Page}
-      useIsSharedPage={() =>
-        ({
-          isSharedPage: false,
-          toggleSharedPage: unimplemented,
-        }) as any
-      }
-      useShareMode={() =>
-        ({
-          shareMode: 'public',
-          toggleShareMode: unimplemented,
-        }) as any
-      }
+      isSharedPage={false}
+      disableShare={unimplemented}
+      changeShare={unimplemented}
+      currentShareMode="edgeless"
       currentPageMode="page"
       workspace={localWorkspace}
       onEnableAffineCloud={unimplemented}
@@ -117,18 +109,10 @@ export const AffineBasic: StoryFn = () => {
   return (
     <ShareMenu
       currentPage={blockSuiteWorkspace.getPage('page0') as Page}
-      useIsSharedPage={() =>
-        ({
-          isSharedPage: false,
-          toggleSharedPage: unimplemented,
-        }) as any
-      }
-      useShareMode={() =>
-        ({
-          shareMode: 'public',
-          toggleShareMode: unimplemented,
-        }) as any
-      }
+      isSharedPage={true}
+      disableShare={unimplemented}
+      changeShare={unimplemented}
+      currentShareMode="edgeless"
       currentPageMode="page"
       workspace={affineWorkspace}
       onEnableAffineCloud={unimplemented}

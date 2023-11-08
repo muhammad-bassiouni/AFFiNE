@@ -26,17 +26,10 @@ export interface ShareMenuProps<
   workspace: Workspace;
   currentPage: Page;
   currentPageMode: ShareMode;
-  useIsSharedPage: (
-    workspaceId: string,
-    pageId: string
-  ) => {
-    isSharedPage: boolean;
-    toggleShare: (enable: boolean, shareMode?: ShareMode) => void;
-  };
-  useShareMode: (
-    workspaceId: string,
-    pageId: string
-  ) => [ShareMode, (shareMode: ShareMode) => void];
+  isSharedPage: boolean;
+  changeShare: (mode: ShareMode) => void;
+  currentShareMode: ShareMode;
+  disableShare: () => void;
   onEnableAffineCloud: () => void;
   togglePagePublic: () => Promise<void>;
   exportHandler: (type: 'pdf' | 'html' | 'png' | 'markdown') => Promise<void>;
@@ -84,8 +77,7 @@ const LocalShareMenu = (props: ShareMenuProps) => {
 const CloudShareMenu = (props: ShareMenuProps) => {
   const t = useAFFiNEI18N();
 
-  const { workspace, currentPage, useIsSharedPage } = props;
-  const { isSharedPage } = useIsSharedPage(workspace.id, currentPage.id);
+  const { isSharedPage } = props;
 
   return (
     <Menu

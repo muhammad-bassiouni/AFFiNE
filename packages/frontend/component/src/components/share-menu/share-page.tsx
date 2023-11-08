@@ -71,15 +71,11 @@ export const AffineSharePage = (props: ShareMenuProps) => {
     workspace: { id: workspaceId },
     currentPage: { id: pageId },
     currentPageMode,
+    isSharedPage,
+    changeShare,
+    currentShareMode,
+    disableShare,
   } = props;
-  const { isSharedPage, toggleShare } = props.useIsSharedPage(
-    workspaceId,
-    pageId
-  );
-  const [currentShareMode, updateShareMode] = props.useShareMode(
-    workspaceId,
-    pageId
-  );
 
   const [showDisable, setShowDisable] = useState(false);
   const [showChangeModeModal, setShowChangeModeModal] = useState(false);
@@ -103,16 +99,16 @@ export const AffineSharePage = (props: ShareMenuProps) => {
   const t = useAFFiNEI18N();
 
   const onClickCreateLink = useCallback(() => {
-    toggleShare(true, mode);
-  }, [mode, toggleShare]);
+    changeShare(mode);
+  }, [changeShare, mode]);
 
   const onDisablePublic = useCallback(() => {
-    toggleShare(false);
+    disableShare();
     toast('Successfully disabled', {
       portal: document.body,
     });
     setShowDisable(false);
-  }, [toggleShare]);
+  }, [disableShare]);
 
   const onShareModeChange = useCallback(
     (value: ShareMode) => {
@@ -126,10 +122,10 @@ export const AffineSharePage = (props: ShareMenuProps) => {
 
   const onConfirmChangeMode = useCallback(() => {
     const value = mode === 'edgeless' ? 'page' : 'edgeless';
-    updateShareMode(value);
+    changeShare(value);
     setMode(value);
     setShowChangeModeModal(false);
-  }, [mode, updateShareMode]);
+  }, [changeShare, mode]);
 
   return (
     <>

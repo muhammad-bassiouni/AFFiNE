@@ -10,7 +10,6 @@ import { useCallback, useState } from 'react';
 import { currentModeAtom } from '../../../atoms/mode';
 import { useExportPage } from '../../../hooks/affine/use-export-page';
 import { useIsSharedPage } from '../../../hooks/affine/use-is-shared-page';
-import { useShareMode } from '../../../hooks/affine/use-share-mode';
 import { useOnTransformWorkspace } from '../../../hooks/root/use-on-transform-workspace';
 import { EnableAffineCloudModal } from '../enable-affine-cloud-modal';
 
@@ -24,6 +23,8 @@ export const SharePageModal = ({ workspace, page }: SharePageModalProps) => {
   const [open, setOpen] = useState(false);
   const exportHandler = useExportPage(page);
   const currentMode = useAtomValue(currentModeAtom);
+  const { isSharedPage, disableShare, changeShare, currentShareMode } =
+    useIsSharedPage(workspace.id, page.id);
 
   const handleConfirm = useCallback(() => {
     if (workspace.flavour !== WorkspaceFlavour.LOCAL) {
@@ -43,8 +44,10 @@ export const SharePageModal = ({ workspace, page }: SharePageModalProps) => {
         workspace={workspace}
         currentPage={page}
         currentPageMode={currentMode}
-        useShareMode={useShareMode}
-        useIsSharedPage={useIsSharedPage}
+        isSharedPage={isSharedPage}
+        disableShare={disableShare}
+        changeShare={changeShare}
+        currentShareMode={currentShareMode}
         onEnableAffineCloud={() => setOpen(true)}
         togglePagePublic={async () => {}}
         exportHandler={exportHandler}
