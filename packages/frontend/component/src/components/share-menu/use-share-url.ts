@@ -18,12 +18,12 @@ export const generateUrl = ({
   workspaceId,
   pageId,
   urlType,
-  mode = 'page',
+  mode,
 }: UseSharingUrl) => {
   const url = new URL(
     `${runtimeConfig.serverUrlPrefix}/${urlType}/${workspaceId}/${pageId}`
   );
-  if (urlType === 'share') {
+  if (urlType === 'share' && mode) {
     url.search = new URLSearchParams({ mode }).toString();
   }
   return url.toString();
