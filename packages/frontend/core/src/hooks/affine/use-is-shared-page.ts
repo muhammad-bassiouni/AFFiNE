@@ -1,5 +1,4 @@
 import { pushNotificationAtom } from '@affine/component/notification-center';
-import type { ShareMode } from '@affine/component/share-menu/use-share-url';
 import {
   getWorkspacePublicPagesQuery,
   PublicPageMode,
@@ -11,14 +10,16 @@ import { useMutation, useQuery } from '@affine/workspace/affine/gql';
 import { useSetAtom } from 'jotai';
 import { useCallback, useMemo } from 'react';
 
+import type { PageMode } from '../../atoms';
+
 export function useIsSharedPage(
   workspaceId: string,
   pageId: string
 ): {
   isSharedPage: boolean;
-  changeShare: (mode: ShareMode) => void;
+  changeShare: (mode: PageMode) => void;
   disableShare: () => void;
-  currentShareMode: ShareMode;
+  currentShareMode: PageMode;
 } {
   const t = useAFFiNEI18N();
   const pushNotification = useSetAtom(pushNotificationAtom);
@@ -42,14 +43,14 @@ export function useIsSharedPage(
     );
     const isPageShared = !!publicPage;
 
-    const currentShareMode: ShareMode =
+    const currentShareMode: PageMode =
       publicPage?.mode === PublicPageMode.Edgeless ? 'edgeless' : 'page';
 
     return [isPageShared, currentShareMode];
   }, [data?.workspace.publicPages, pageId]);
 
   const changeShare = useCallback(
-    (mode: ShareMode) => {
+    (mode: PageMode) => {
       const publishMode =
         mode === 'edgeless' ? PublicPageMode.Edgeless : PublicPageMode.Page;
 

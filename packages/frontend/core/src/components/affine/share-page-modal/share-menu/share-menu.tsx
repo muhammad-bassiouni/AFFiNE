@@ -12,10 +12,10 @@ import { Button } from '@toeverything/components/button';
 import { Divider } from '@toeverything/components/divider';
 import { Menu } from '@toeverything/components/menu';
 
+import { useIsSharedPage } from '../../../../hooks/affine/use-is-shared-page';
 import * as styles from './index.css';
 import { ShareExport } from './share-export';
 import { SharePage } from './share-page';
-import type { ShareMode } from './use-share-url';
 
 export interface ShareMenuProps<
   Workspace extends AffineOfficialWorkspace =
@@ -25,14 +25,7 @@ export interface ShareMenuProps<
 > {
   workspace: Workspace;
   currentPage: Page;
-  currentPageMode: ShareMode;
-  isSharedPage: boolean;
-  changeShare: (mode: ShareMode) => void;
-  currentShareMode: ShareMode;
-  disableShare: () => void;
   onEnableAffineCloud: () => void;
-  togglePagePublic: () => Promise<void>;
-  exportHandler: (type: 'pdf' | 'html' | 'png' | 'markdown') => Promise<void>;
 }
 
 const ShareMenuContent = (props: ShareMenuProps) => {
@@ -76,8 +69,11 @@ const LocalShareMenu = (props: ShareMenuProps) => {
 
 const CloudShareMenu = (props: ShareMenuProps) => {
   const t = useAFFiNEI18N();
-
-  const { isSharedPage } = props;
+  const {
+    workspace: { id: workspaceId },
+    currentPage: { id: pageId },
+  } = props;
+  const { isSharedPage } = useIsSharedPage(workspaceId, pageId);
 
   return (
     <Menu

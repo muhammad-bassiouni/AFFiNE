@@ -1,9 +1,6 @@
 import { toast } from '@affine/component';
-import {
-  PublicLinkDisableModal,
-  StyledDisableButton,
-} from '@affine/component/share-menu';
-import { ShareMenu } from '@affine/component/share-menu';
+import { PublicLinkDisableModal } from '@affine/component/disable-public-link';
+import { ShareMenu } from '@affine/core/components/affine/share-page-modal/share-menu';
 import type {
   AffineCloudWorkspace,
   LocalWorkspace,
@@ -74,15 +71,8 @@ export const Basic: StoryFn = () => {
   return (
     <ShareMenu
       currentPage={blockSuiteWorkspace.getPage('page0') as Page}
-      isSharedPage={false}
-      disableShare={unimplemented}
-      changeShare={unimplemented}
-      currentShareMode="edgeless"
-      currentPageMode="page"
       workspace={localWorkspace}
       onEnableAffineCloud={unimplemented}
-      togglePagePublic={unimplemented}
-      exportHandler={unimplemented}
     />
   );
 };
@@ -109,15 +99,8 @@ export const AffineBasic: StoryFn = () => {
   return (
     <ShareMenu
       currentPage={blockSuiteWorkspace.getPage('page0') as Page}
-      isSharedPage={true}
-      disableShare={unimplemented}
-      changeShare={unimplemented}
-      currentShareMode="edgeless"
-      currentPageMode="page"
       workspace={affineWorkspace}
       onEnableAffineCloud={unimplemented}
-      togglePagePublic={unimplemented}
-      exportHandler={unimplemented}
     />
   );
 };
@@ -127,9 +110,7 @@ export const DisableModal: StoryFn = () => {
   use(promise);
   return (
     <>
-      <StyledDisableButton onClick={() => setOpen(!open)}>
-        Disable Public Link
-      </StyledDisableButton>
+      <div onClick={() => setOpen(!open)}>Disable Public Link</div>
       <PublicLinkDisableModal
         open={open}
         onConfirm={() => {

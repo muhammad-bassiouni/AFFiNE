@@ -1,20 +1,27 @@
+import {
+  Input,
+  RadioButton,
+  RadioButtonGroup,
+  Switch,
+  toast,
+} from '@affine/component';
+import { PublicLinkDisableModal } from '@affine/component/disable-public-link';
 import { WorkspaceFlavour } from '@affine/env/workspace';
 import { useAFFiNEI18N } from '@affine/i18n/hooks';
 import { ArrowRightSmallIcon } from '@blocksuite/icons';
 import { Button } from '@toeverything/components/button';
 import { Menu, MenuItem, MenuTrigger } from '@toeverything/components/menu';
 import { ConfirmModal } from '@toeverything/components/modal';
+import { useAtomValue } from 'jotai';
 import { useMemo, useState } from 'react';
 import { useCallback } from 'react';
 
-import { RadioButton, RadioButtonGroup } from '../../ui/button';
-import Input from '../../ui/input';
-import { Switch } from '../../ui/switch';
-import { toast } from '../../ui/toast';
-import { PublicLinkDisableModal } from './disable-public-link';
+import type { PageMode } from '../../../../atoms';
+import { currentModeAtom } from '../../../../atoms/mode';
+import { useIsSharedPage } from '../../../../hooks/affine/use-is-shared-page';
 import * as styles from './index.css';
 import type { ShareMenuProps } from './share-menu';
-import { type ShareMode, useSharingUrl } from './use-share-url';
+import { useSharingUrl } from './use-share-url';
 
 const CloudSvg = () => (
   <svg
@@ -65,16 +72,14 @@ export const AffineSharePage = (props: ShareMenuProps) => {
   const {
     workspace: { id: workspaceId },
     currentPage: { id: pageId },
-    currentPageMode,
-    isSharedPage,
-    changeShare,
-    currentShareMode,
-    disableShare,
   } = props;
 
   const [showDisable, setShowDisable] = useState(false);
   const [showChangeModeModal, setShowChangeModeModal] = useState(false);
-  const [mode, setMode] = useState<ShareMode>(currentPageMode);
+  const { isSharedPage, changeShare, currentShareMode, disableShare } =
+    useIsSharedPage(workspaceId, pageId);
+  const currentPageMode = useAtomValue(currentModeAtom);
+  const [mode, setMode] = useState<PageMode>(currentPageMode);
 
   const defaultMode = useMemo(() => {
     if (isSharedPage) {
@@ -106,7 +111,7 @@ export const AffineSharePage = (props: ShareMenuProps) => {
   }, [disableShare]);
 
   const onShareModeChange = useCallback(
-    (value: ShareMode) => {
+    (value: PageMode) => {
       if (isSharedPage) {
         return setShowChangeModeModal(true);
       }

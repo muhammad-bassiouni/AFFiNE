@@ -1,17 +1,16 @@
+import { toast } from '@affine/component';
 import { useAFFiNEI18N } from '@affine/i18n/hooks';
 import { useCallback, useMemo } from 'react';
 
-import { toast } from '../../ui/toast';
+import type { PageMode } from '../../../../atoms';
 
 type UrlType = 'share' | 'workspace';
-
-export type ShareMode = 'page' | 'edgeless';
 
 type UseSharingUrl = {
   workspaceId: string;
   pageId: string;
   urlType: UrlType;
-  mode?: ShareMode;
+  mode?: PageMode;
 };
 
 export const generateUrl = ({
