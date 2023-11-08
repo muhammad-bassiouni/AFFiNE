@@ -11,7 +11,6 @@ import { useAFFiNEI18N } from '@affine/i18n/hooks';
 import { ArrowRightSmallIcon } from '@blocksuite/icons';
 import { Button } from '@toeverything/components/button';
 import { Menu, MenuItem, MenuTrigger } from '@toeverything/components/menu';
-import { ConfirmModal } from '@toeverything/components/modal';
 import { useAtomValue } from 'jotai';
 import { useMemo, useState } from 'react';
 import { useCallback } from 'react';
@@ -75,11 +74,14 @@ export const AffineSharePage = (props: ShareMenuProps) => {
   } = props;
   const pageId = currentPage.id;
   const [showDisable, setShowDisable] = useState(false);
-  const [showChangeModeModal, setShowChangeModeModal] = useState(false);
-  const { isSharedPage, changeShare, currentShareMode, disableShare } =
-    useIsSharedPage(workspaceId, currentPage.spaceDoc.guid);
+  const {
+    isSharedPage,
+    enableShare,
+    changeShare,
+    currentShareMode,
+    disableShare,
+  } = useIsSharedPage(workspaceId, currentPage.spaceDoc.guid);
   const currentPageMode = useAtomValue(currentModeAtom);
-  const [mode, setMode] = useState<PageMode>(currentPageMode);
 
   const defaultMode = useMemo(() => {
     if (isSharedPage) {
@@ -89,6 +91,7 @@ export const AffineSharePage = (props: ShareMenuProps) => {
     // default to current page mode
     return currentPageMode;
   }, [currentPageMode, currentShareMode, isSharedPage]);
+  const [mode, setMode] = useState<PageMode>(defaultMode);
 
   const { sharingUrl, onClickCopyLink } = useSharingUrl({
     workspaceId,
@@ -98,8 +101,8 @@ export const AffineSharePage = (props: ShareMenuProps) => {
   const t = useAFFiNEI18N();
 
   const onClickCreateLink = useCallback(() => {
-    changeShare(mode);
-  }, [changeShare, mode]);
+    enableShare(mode);
+  }, [enableShare, mode]);
 
   const onDisablePublic = useCallback(() => {
     disableShare();
@@ -111,20 +114,11 @@ export const AffineSharePage = (props: ShareMenuProps) => {
 
   const onShareModeChange = useCallback(
     (value: PageMode) => {
-      if (isSharedPage) {
-        return setShowChangeModeModal(true);
-      }
       setMode(value);
+      changeShare(value);
     },
-    [isSharedPage]
+    [changeShare]
   );
-
-  const onConfirmChangeMode = useCallback(() => {
-    const value = mode === 'edgeless' ? 'page' : 'edgeless';
-    changeShare(value);
-    setMode(value);
-    setShowChangeModeModal(false);
-  }, [changeShare, mode]);
 
   return (
     <>
@@ -243,19 +237,6 @@ export const AffineSharePage = (props: ShareMenuProps) => {
             open={showDisable}
             onConfirm={onDisablePublic}
             onOpenChange={setShowDisable}
-          />
-          <ConfirmModal
-            open={showChangeModeModal}
-            onOpenChange={setShowChangeModeModal}
-            title={t['com.affine.share-menu.confirm-modify-mode.title']()}
-            description={t['com.affine.share-menu.confirm-modify-mode.title']()}
-            confirmButtonOptions={{
-              type: 'primary',
-              ['data-testid' as string]:
-                'confirm-change-share-page-mode-button',
-              children: 'Modify',
-            }}
-            onConfirm={onConfirmChangeMode}
           />
         </>
       ) : null}

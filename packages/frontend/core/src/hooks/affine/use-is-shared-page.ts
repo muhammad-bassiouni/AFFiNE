@@ -20,6 +20,7 @@ export function useIsSharedPage(
   changeShare: (mode: PageMode) => void;
   disableShare: () => void;
   currentShareMode: PageMode;
+  enableShare: (mode: PageMode) => void;
 } {
   const t = useAFFiNEI18N();
   const pushNotification = useSetAtom(pushNotificationAtom);
@@ -49,7 +50,7 @@ export function useIsSharedPage(
     return [isPageShared, currentShareMode];
   }, [data?.workspace.publicPages, pageId]);
 
-  const changeShare = useCallback(
+  const enableShare = useCallback(
     (mode: PageMode) => {
       const publishMode =
         mode === 'edgeless' ? PublicPageMode.Edgeless : PublicPageMode.Page;
@@ -80,6 +81,51 @@ export function useIsSharedPage(
             message:
               t[
                 'com.affine.share-menu.create-public-link.notification.fail.message'
+              ](),
+            type: 'error',
+          });
+
+          console.error(e);
+        });
+    },
+    [enableSharePage, mutate, pageId, pushNotification, t, workspaceId]
+  );
+  const changeShare = useCallback(
+    (mode: PageMode) => {
+      const publishMode =
+        mode === 'edgeless' ? PublicPageMode.Edgeless : PublicPageMode.Page;
+
+      enableSharePage({ workspaceId, pageId, mode: publishMode })
+        .then(() => {
+          pushNotification({
+            title:
+              t[
+                'com.affine.share-menu.confirm-modify-mode.notification.success.title'
+              ](),
+            message: t[
+              'com.affine.share-menu.confirm-modify-mode.notification.success.message'
+            ]({
+              preMode:
+                publishMode === PublicPageMode.Edgeless
+                  ? PublicPageMode.Page
+                  : PublicPageMode.Edgeless,
+              currentMode: publishMode,
+            }),
+            type: 'success',
+            theme: 'default',
+          });
+
+          return mutate();
+        })
+        .catch(e => {
+          pushNotification({
+            title:
+              t[
+                'com.affine.share-menu.confirm-modify-mode.notification.fail.title'
+              ](),
+            message:
+              t[
+                'com.affine.share-menu.confirm-modify-mode.notification.fail.message'
               ](),
             type: 'error',
           });
@@ -129,9 +175,10 @@ export function useIsSharedPage(
     () => ({
       isSharedPage,
       currentShareMode,
-      changeShare,
+      enableShare,
       disableShare,
+      changeShare,
     }),
-    [changeShare, currentShareMode, disableShare, isSharedPage]
+    [isSharedPage, currentShareMode, enableShare, disableShare, changeShare]
   );
 }
