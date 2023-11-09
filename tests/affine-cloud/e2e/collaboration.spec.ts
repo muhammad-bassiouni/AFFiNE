@@ -78,10 +78,7 @@ test.describe('collaboration', () => {
     }
   });
 
-  test('share page with default edgeless, and you can click edit button to return edit page', async ({
-    page,
-    browser,
-  }) => {
+  test('share page with default edgeless', async ({ page, browser }) => {
     await page.reload();
     await waitForEditorLoad(page);
     await createLocalWorkspace(
@@ -120,59 +117,10 @@ test.describe('collaboration', () => {
       expect(await page2.textContent('affine-paragraph')).toContain(
         'TEST CONTENT'
       );
-      await page2.getByTestId('share-page-edit-button').click();
-      const shareButton = page2.getByTestId('cloud-share-menu-button');
-      await expect(shareButton).toBeVisible();
-    }
-  });
-
-  test('share the page with default edgeless, and you can sign out and would not be able to edit', async ({
-    page,
-    browser,
-  }) => {
-    await page.reload();
-    await waitForEditorLoad(page);
-    await createLocalWorkspace(
-      {
-        name: 'test',
-      },
-      page
-    );
-    await enableCloudWorkspaceFromShareButton(page);
-    const title = getBlockSuiteEditorTitle(page);
-    await title.pressSequentially('TEST TITLE', {
-      delay: 50,
-    });
-    await page.keyboard.press('Enter', { delay: 50 });
-    await page.keyboard.type('TEST CONTENT', { delay: 50 });
-    await clickEdgelessModeButton(page);
-    await expect(page.locator('affine-edgeless-page')).toBeVisible({
-      timeout: 1000,
-    });
-    await page.getByTestId('cloud-share-menu-button').click();
-    await page.getByTestId('share-menu-create-link-button').click();
-    await page.getByTestId('share-menu-copy-link-button').click();
-
-    // check share page is accessible
-    {
-      const context = await browser.newContext();
-      const url: string = await page.evaluate(() =>
-        navigator.clipboard.readText()
-      );
-      const page2 = await context.newPage();
-      await page2.goto(url);
-      await waitForEditorLoad(page2);
-      await expect(page.locator('affine-edgeless-page')).toBeVisible({
-        timeout: 1000,
-      });
-      expect(await page2.textContent('affine-paragraph')).toContain(
-        'TEST CONTENT'
-      );
-      await page2.getByTestId('share-page-user-avatar').click();
-      await waitForEditorLoad(page2);
-
+      const logo = page2.getByTestId('share-page-logo');
       const editButton = page2.getByTestId('share-page-edit-button');
       await expect(editButton).not.toBeVisible();
+      await expect(logo).toBeVisible();
     }
   });
 
