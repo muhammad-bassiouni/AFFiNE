@@ -21,6 +21,7 @@ import { applyUpdate } from 'yjs';
 import { PageDetailEditor } from '../../adapters/shared';
 import type { PageMode } from '../../atoms';
 import { AppContainer } from '../../components/affine/app-container';
+import { ShareHeader } from '../../components/share-header';
 import { SharePageNotFoundError } from '../../components/share-page-not-found-error';
 
 type LoaderData = {
@@ -82,6 +83,11 @@ export const Component = (): ReactElement => {
   return (
     <AppContainer>
       <MainContainer>
+        <ShareHeader
+          workspace={page.workspace}
+          pageId={page.id}
+          publishMode={publishMode}
+        />
         <PageDetailEditor
           isPublic
           publishMode={publishMode}
