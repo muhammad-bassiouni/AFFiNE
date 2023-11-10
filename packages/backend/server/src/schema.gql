@@ -178,6 +178,7 @@ type WorkspaceType {
 
   """Blobs size of workspace"""
   blobsSize: Int!
+
   """Shared pages of workspace"""
   sharedPages: [String!]! @deprecated(reason: "use WorkspaceType.publicPages")
 

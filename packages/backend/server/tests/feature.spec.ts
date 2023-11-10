@@ -92,11 +92,11 @@ test('should be able to check early access', async t => {
   const { auth, feature, early_access } = t.context;
   const u1 = await auth.signUp('DarkSky', 'darksky@example.org', '123456');
 
-  const f1 = await early_access.canEarlyAccess(u1.id);
+  const f1 = await early_access.canEarlyAccess(u1.email);
   t.false(f1, 'should not have early access');
 
   await early_access.addEarlyAccess(u1.id);
-  const f2 = await early_access.canEarlyAccess(u1.id);
+  const f2 = await early_access.canEarlyAccess(u1.email);
   t.true(f2, 'should have early access');
 
   const f3 = await feature.listFeatureUsers(FeatureType.Feature_EarlyAccess);
@@ -108,18 +108,18 @@ test('should be able revert quota', async t => {
   const { auth, feature, early_access } = t.context;
   const u1 = await auth.signUp('DarkSky', 'darksky@example.org', '123456');
 
-  const f1 = await early_access.canEarlyAccess(u1.id);
+  const f1 = await early_access.canEarlyAccess(u1.email);
   t.false(f1, 'should not have early access');
 
   await early_access.addEarlyAccess(u1.id);
-  const f2 = await early_access.canEarlyAccess(u1.id);
+  const f2 = await early_access.canEarlyAccess(u1.email);
   t.true(f2, 'should have early access');
   const q1 = await early_access.listEarlyAccess();
   t.is(q1.length, 1, 'should have one user');
   t.is(q1[0].id, u1.id, 'should be the same user');
 
   await early_access.removeEarlyAccess(u1.id);
-  const f3 = await early_access.canEarlyAccess(u1.id);
+  const f3 = await early_access.canEarlyAccess(u1.email);
   t.false(f3, 'should not have early access');
   const q2 = await early_access.listEarlyAccess();
   t.is(q2.length, 0, 'should have no user');
