@@ -32,6 +32,10 @@ inputs:
   nmHoistingLimits:
     description: 'Set nmHoistingLimits in .yarnrc.yml'
     required: false
+  enableScripts:
+    description: 'Set enableScripts in .yarnrc.yml'
+    required: false
+    default: 'true'
 
 runs:
   using: 'composite'
@@ -54,6 +58,11 @@ runs:
       shell: bash
       run: yarn config set nmHoistingLimits ${{ inputs.nmHoistingLimits }}
 
+    - name: Set enableScripts
+      if: ${{ inputs.enableScripts == 'false' }}
+      shell: bash
+      run: yarn config set enableScripts false
+
     - name: yarn install
       if: ${{ inputs.package-install == 'true' }}
       continue-on-error: true
@@ -64,6 +73,7 @@ runs:
         PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
         ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
         SENTRYCLI_SKIP_DOWNLOAD: '1'
+        DEBUG: '*'
 
     - name: yarn install (try again)
       if: ${{ steps.install.outcome == 'failure' }}
@@ -74,6 +84,7 @@ runs:
         PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
         ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
         SENTRYCLI_SKIP_DOWNLOAD: '1'
+        DEBUG: '*'
 
     - name: Get installed Playwright version
       id: playwright-version

@@ -25,7 +25,6 @@ import { initEmptyPage } from '@toeverything/infra/blocksuite';
 import { buildShowcaseWorkspace } from '@toeverything/infra/blocksuite';
 import { useAtomValue } from 'jotai';
 import { nanoid } from 'nanoid';
-import { useCallback } from 'react';
 
 import { setPageModeAtom } from '../../atoms';
 import {
@@ -92,14 +91,11 @@ export const LocalAdapter: WorkspaceAdapter<WorkspaceFlavour.LOCAL> = {
         throw new PageNotFoundError(workspace, currentPageId);
       }
       return (
-        <>
-          <PageDetailEditor
-            pageId={currentPageId}
-            onInit={useCallback(async page => initEmptyPage(page), [])}
-            onLoad={onLoadEditor}
-            workspace={workspace}
-          />
-        </>
+        <PageDetailEditor
+          pageId={currentPageId}
+          onLoad={onLoadEditor}
+          workspace={workspace}
+        />
       );
     },
     NewSettingsDetail: ({

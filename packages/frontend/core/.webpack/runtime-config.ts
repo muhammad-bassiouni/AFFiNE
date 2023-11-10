@@ -17,10 +17,11 @@ export function getRuntimeConfig(buildFlags: BuildFlags): RuntimeConfig {
   const buildPreset: Record<BuildFlags['channel'], RuntimeConfig> = {
     stable: {
       enablePlugin: true,
+      builtinPlugins: ['/plugins/image-preview'],
       enableTestProperties: false,
       enableBroadcastChannelProvider: true,
       enableDebugPage: true,
-      changelogUrl: 'https://affine.pro/blog/what-is-new-affine-0818',
+      changelogUrl: 'https://affine.pro/what-is-new',
       imageProxyUrl: 'https://workers.toeverything.workers.dev/proxy/image',
       enablePreloading: true,
       enableNewSettingModal: true,
@@ -32,7 +33,7 @@ export function getRuntimeConfig(buildFlags: BuildFlags): RuntimeConfig {
       enableCaptcha: true,
       enableEnhanceShareMode: false,
       enablePayment: true,
-      serverUrlPrefix: 'https://app.affine.pro',
+      serverUrlPrefix: 'https://insider.affine.pro', // Let insider be stable environment temporarily.
       editorFlags,
       appVersion: packageJson.version,
       editorVersion: packageJson.dependencies['@blocksuite/editor'],
@@ -52,6 +53,13 @@ export function getRuntimeConfig(buildFlags: BuildFlags): RuntimeConfig {
     // canary will be aggressive and enable all features
     canary: {
       enablePlugin: true,
+      builtinPlugins: [
+        '/plugins/copilot',
+        '/plugins/hello-world',
+        '/plugins/image-preview',
+        '/plugins/vue-hello-world',
+        '/plugins/outline',
+      ],
       enableTestProperties: true,
       enableBroadcastChannelProvider: true,
       enableDebugPage: true,
@@ -83,6 +91,13 @@ export function getRuntimeConfig(buildFlags: BuildFlags): RuntimeConfig {
   const currentBuildPreset = buildPreset[currentBuild];
 
   const environmentPreset = {
+    builtinPlugins: [
+      '/plugins/copilot',
+      '/plugins/hello-world',
+      '/plugins/image-preview',
+      '/plugins/vue-hello-world',
+      '/plugins/outline',
+    ],
     enablePlugin: process.env.ENABLE_PLUGIN
       ? process.env.ENABLE_PLUGIN === 'true'
       : currentBuildPreset.enablePlugin,

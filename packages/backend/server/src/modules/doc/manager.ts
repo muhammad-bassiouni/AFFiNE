@@ -32,6 +32,14 @@ function compare(yBinary: Buffer, jwstBinary: Buffer, strict = false): boolean {
   return compare(yBinary, yBinary2, true);
 }
 
+function isEmptyBuffer(buf: Buffer): boolean {
+  return (
+    buf.length == 0 ||
+    // 0x0000
+    (buf.length === 2 && buf[0] === 0 && buf[1] === 0)
+  );
+}
+
 const MAX_SEQ_NUM = 0x3fffffff; // u31
 
 /**
@@ -68,31 +76,50 @@ export class DocManager implements OnModuleInit, OnModuleDestroy {
     this.destroy();
   }
 
-  protected recoverDoc(...updates: Buffer[]): Doc {
+  protected recoverDoc(...updates: Buffer[]): Promise<Doc> {
     const doc = new Doc();
+    const chunks = chunk(updates, 10);
 
-    updates.forEach((update, i) => {
-      try {
-        if (update.length) {
-          applyUpdate(doc, update);
+    return new Promise(resolve => {
+      const next = () => {
+        const updates = chunks.shift();
+        if (updates?.length) {
+          updates.forEach(u => {
+            try {
+              applyUpdate(doc, u);
+            } catch (e) {
+              this.logger.error(
+                `Failed to apply update: ${updates
+                  .map(u => u.toString('hex'))
+                  .join('\n')}`
+              );
+            }
+          });
+
+          // avoid applying too many updates in single round which will take the whole cpu time like dead lock
+          setImmediate(() => {
+            next();
+          });
+        } else {
+          resolve(doc);
         }
-      } catch (e) {
-        this.logger.error(
-          `Failed to apply updates, index: ${i}\nUpdate: ${updates
-            .map(u => u.toString('hex'))
-            .join('\n')}`
-        );
-      }
-    });
+      };
 
-    return doc;
+      next();
+    });
   }
 
-  protected applyUpdates(guid: string, ...updates: Buffer[]): Doc {
-    const doc = this.recoverDoc(...updates);
+  protected async applyUpdates(
+    guid: string,
+    ...updates: Buffer[]
+  ): Promise<Doc> {
+    const doc = await this.recoverDoc(...updates);
 
     // test jwst codec
-    if (this.config.doc.manager.experimentalMergeWithJwstCodec) {
+    if (
+      this.config.doc.manager.experimentalMergeWithJwstCodec &&
+      updates.length < 100 /* avoid overloading */
+    ) {
       this.metrics.jwstCodecMerge(1, {});
       const yjsResult = Buffer.from(encodeStateAsUpdate(doc));
       let log = false;
@@ -174,6 +201,9 @@ export class DocManager implements OnModuleInit, OnModuleDestroy {
       defer(async () => {
         const seq = await this.getUpdateSeq(workspaceId, guid);
         await this.db.update.create({
+          select: {
+            seq: true,
+          },
           data: {
             workspaceId,
             id: guid,
@@ -312,6 +342,10 @@ export class DocManager implements OnModuleInit, OnModuleDestroy {
         workspaceId,
         id: guid,
       },
+      // take it ease, we don't want to overload db and or cpu
+      // if we limit the taken number here,
+      // user will never see the latest doc if there are too many updates pending to be merged.
+      take: 100,
     });
 
     // perf(memory): avoid sorting in db
@@ -324,8 +358,9 @@ export class DocManager implements OnModuleInit, OnModuleDestroy {
   protected async autoSquash() {
     // find the first update and batch process updates with same id
     const first = await this.db.update.findFirst({
-      orderBy: {
-        createdAt: 'asc',
+      select: {
+        id: true,
+        workspaceId: true,
       },
     });
 
@@ -354,7 +389,15 @@ export class DocManager implements OnModuleInit, OnModuleDestroy {
   ) {
     const blob = Buffer.from(encodeStateAsUpdate(doc));
     const state = Buffer.from(encodeStateVector(doc));
-    return this.db.snapshot.upsert({
+
+    if (isEmptyBuffer(blob)) {
+      return;
+    }
+
+    await this.db.snapshot.upsert({
+      select: {
+        seq: true,
+      },
       where: {
         id_workspaceId: {
           id: guid,
@@ -402,7 +445,7 @@ export class DocManager implements OnModuleInit, OnModuleDestroy {
     const first = updates[0];
     const last = updates[updates.length - 1];
 
-    const doc = this.applyUpdates(
+    const doc = await this.applyUpdates(
       first.id,
       snapshot ? snapshot.blob : Buffer.from([0, 0]),
       ...updates.map(u => u.blob)

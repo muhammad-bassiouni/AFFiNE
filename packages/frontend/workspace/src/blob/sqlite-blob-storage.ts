@@ -1,6 +1,8 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlobStorage } from '@blocksuite/store';
 
+import { bufferToBlob } from './util';
+
 export const createSQLiteStorage = (workspaceId: string): BlobStorage => {
   const apis = window.apis;
   assertExists(apis);
@@ -8,7 +10,10 @@ export const createSQLiteStorage = (workspaceId: string): BlobStorage => {
     crud: {
       get: async (key: string) => {
         const buffer = await apis.db.getBlob(workspaceId, key);
-        return buffer ? new Blob([buffer]) : null;
+        if (buffer) {
+          return bufferToBlob(buffer);
+        }
+        return null;
       },
       set: async (key: string, value: Blob) => {
         await apis.db.addBlob(
