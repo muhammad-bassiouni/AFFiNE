@@ -27,7 +27,7 @@ jobs:
       - name: Build Server
         run: yarn workspace @affine/server build
       - name: Upload server dist
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: server-dist
           path: ./packages/backend/server/dist
@@ -53,7 +53,7 @@ jobs:
           TRACE_REPORT_ENDPOINT: ${{ secrets.TRACE_REPORT_ENDPOINT }}
           CAPTCHA_SITE_KEY: ${{ secrets.CAPTCHA_SITE_KEY }}
       - name: Upload core artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: core
           path: ./packages/frontend/core/dist
@@ -74,7 +74,7 @@ jobs:
           package: '@affine/storage'
           nx_token: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
       - name: Upload storage.node
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: storage.node
           path: ./packages/backend/storage/storage.node
@@ -95,7 +95,7 @@ jobs:
           package: '@affine/storage'
           nx_token: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
       - name: Upload storage.node
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: storage.arm64.node
           path: ./packages/backend/storage/storage.node
