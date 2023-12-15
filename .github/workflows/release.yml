@@ -39,7 +39,7 @@ jobs:
       - name: Build Core
         run: yarn nx build @affine/core
       - name: Upload core artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: core
           path: ./packages/frontend/core/dist
@@ -58,7 +58,7 @@ jobs:
       - name: Build Server
         run: yarn nx build @affine/server
       - name: Upload server dist
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: server-dist
           path: ./packages/backend/server/dist
@@ -82,7 +82,7 @@ jobs:
           package: '@affine/storage'
           nx_token: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
       - name: Upload storage.node
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: storage.node
           path: ./packages/backend/storage/storage.node
