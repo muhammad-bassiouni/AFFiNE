@@ -129,7 +129,7 @@ jobs:
           nx_token: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
       - name: Replace Version
         run: ./scripts/set-version.sh ${{ needs.set-build-version.outputs.version }}
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: core
           path: packages/frontend/electron/resources/web-static
@@ -191,22 +191,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Download Artifacts (macos-x64)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: affine-darwin-x64-builds
           path: ./
       - name: Download Artifacts (macos-arm64)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: affine-darwin-arm64-builds
           path: ./
       - name: Download Artifacts (windows-x64)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: affine-win32-x64-builds
           path: ./
       - name: Download Artifacts (linux-x64)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: affine-linux-x64-builds
           path: ./

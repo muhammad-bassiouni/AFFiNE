@@ -134,7 +134,7 @@ jobs:
         working-directory: packages/frontend/electron
 
       - name: Download core artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: core
           path: packages/frontend/electron/resources/web-static
